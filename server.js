@@ -10,26 +10,31 @@ const session = require('express-session');
 
 const app = express();
 connectDB();
+
+// CORS Middleware (must be first)
+app.use(cors({
+  origin: 'https://idk-academy-aws.netlify.app',
+  credentials: true
+}));
+
+// Set Access-Control-Allow-Origin header for all responses and handle OPTIONS
+app.use((req, res, next) => {
+  res.header('Access-Control-Allow-Origin', 'https://idk-academy-aws.netlify.app');
+  res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS');
+  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
+  res.header('Access-Control-Allow-Credentials', 'true');
+  if (req.method === 'OPTIONS') {
+    return res.sendStatus(200);
+  }
+  next();
+});
+
 // Log inbound connections
 app.use((req, res, next) => {
   console.log(`[${new Date().toISOString()}] ${req.method} ${req.url}`);
   next();
 });
 
-// Middleware
-app.use(cors({
-  origin: process.env.CLIENT_URL,
-  credentials: true
-}));
-
-// Set Access-Control-Allow-Origin header for all responses
-app.use((req, res, next) => {
-  res.header('Access-Control-Allow-Origin', process.env.CLIENT_URL);
-  res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS');
-  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
-  res.header('Access-Control-Allow-Credentials', 'true');
-  next();
-});
 app.use(express.json());
 
 // Session (for Google OAuth)
